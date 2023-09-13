@@ -1,0 +1,169 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+
+class Musica{
+        private:
+            string titulo;
+            string artista;
+        
+        protected:
+            virtual void tocarIntro(){
+                cout << "A música já vai começar!" << endl << endl;
+            }
+        
+        public:
+            Musica(const string &t, const string& a){
+                titulo = t;
+                artista = a;
+            }
+            
+        virtual void tocar() = 0;
+        
+        string get_titulo( ) { return titulo; }
+        void set_titulo( string& t ) {titulo = t;}
+        
+        string get_artista( ) { return artista; }
+        void set_artista( string& a ) {artista = a;}
+    };
+
+class MusicaLocal : public Musica{
+    private:
+        string caminhoArquivo;
+        
+    public:
+        MusicaLocal(const string &t, const string& a,const string &c) : Musica(t,a), caminhoArquivo(c){}
+        
+        string get_caminhoArquivo( ) { return caminhoArquivo; }
+        void set_caminhoArquivo( string& c ) {caminhoArquivo = c;}
+        
+        
+        virtual void tocar(){
+            tocarIntro();
+            cout << "Titulo: " << get_titulo() << endl;
+            cout << "Artista: " << get_artista() << endl;
+            cout << "Caminho: " << caminhoArquivo << endl<< endl;
+            
+        }
+};
+
+class MusicaStreaming : public Musica{
+    private:
+        string URL;
+        
+    public:
+        MusicaStreaming(const string &t, const string& a, const string &u) : Musica(t,a), URL(u){}
+        
+        string get_URL( ) { return URL; }
+        void set_URL( string& u ) {URL = u;}
+        
+        
+        virtual void tocar(){
+            tocarIntro();
+            cout << "Titulo: " << get_titulo() << endl;
+            cout << "Artista: " << get_artista() << endl;
+            cout << "URL: " << URL << endl << endl;
+            
+        }
+};
+
+
+class Podcast : public Musica{
+    private:
+        string apresentador;
+        vector<string> eps;
+    
+    public:
+        Podcast(const string &t, const string& a, const string& ap) : Musica(t,a), apresentador(ap){}
+        
+        string get_URL( ) { return apresentador; }
+        void set_URL( string& ap ) {apresentador = ap;}
+        
+        void adicionarEp(const string& episodio) {
+            eps.push_back(episodio);
+        }
+        
+        vector<string> getEps() const {
+            return eps;
+        }
+        
+    virtual void tocar(){
+        
+            tocarIntro();
+            cout << "Titulo: " << get_titulo() << endl;
+            cout << "Rede: " << get_artista() << endl;
+            cout << "Apresentador: " << apresentador << endl;
+            cout << "Episodios:" << endl;
+            for(const string& episodio : eps) {
+                cout << "  " << episodio << endl;
+            }
+            cout << endl;
+                
+        }
+        
+    virtual void tocarIntro() override
+        {
+        cout << "Seu podcast já vai começar!" << endl << endl;
+        } 
+
+};
+
+class PodcastPremium : private Podcast{
+    private:
+        float preco;
+    
+    public:
+        PodcastPremium(const string &t, const string& a, const string& ap, float p) : Podcast(t,a,ap), preco(p){}
+    
+    float get_preco( ) { return preco; }
+    void set_preco( float p ) {preco = p;}
+    
+    
+    void adicionarEpPremium(const string& episodio) {
+       adicionarEp(episodio); 
+      }
+ 
+};
+
+
+
+int main()
+{
+    MusicaLocal m1("Jonas Brothers", "Jonas", "jona/s/brothers");
+    MusicaLocal m2("Cake", "LSD", "cake/ls/dilto");
+    MusicaStreaming m3("Bro Jones", "Mamma Mia", "mammamia.com.uk");
+    MusicaStreaming m4("Pudim", "Urca", "urca.pudim.br");
+    
+    Podcast p1("Lindu", "Disney", "LuquinhasGamePlay");
+    p1.adicionarEp("Meowt");
+    p1.adicionarEp("Gati");
+    p1.adicionarEp("Beuti");
+
+    Podcast p2("Amanhã é hoje", "Google", "Cameron");
+    p2.adicionarEp("Terça");
+    p2.adicionarEp("Domingo");
+
+    
+    vector<Musica*> playlist;
+
+    playlist.push_back(&m1);
+    playlist.push_back(&m2);
+    playlist.push_back(&m3);
+    playlist.push_back(&m4);
+    playlist.push_back(&p1);
+    playlist.push_back(&p2);
+
+    for (Musica* m : playlist) {
+        m->tocar();
+    }
+    
+    
+    return 0;
+}
+
