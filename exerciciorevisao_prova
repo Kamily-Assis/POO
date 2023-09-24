@@ -1,0 +1,312 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+
+using namespace std;
+
+class usuario{
+    string nome;
+    int idade;
+    
+    public:
+        usuario(const string& n, int i){
+            nome = n;
+            idade = i;
+        };
+        
+        string get_nome() const {return nome;}
+        void set_nome(string n) {nome = n;}
+        
+        int get_idade() const {return idade;}
+        void set_idade(int i) {idade = i;}
+        
+        virtual void exibir_detalhes() = 0;
+        
+        friend ostream& operator<<(ostream& os, const usuario& us) {
+            os << "Nome: " << us.nome <<endl;
+            os << "Idade: " << us.idade << endl;
+            return os; }
+        
+        /*
+        usuario ostream& operator<<(const string& nome, int idade){
+            cout << "Nome: " << nome << endl;
+            cout << "Idade: " << idade << endl;
+        };
+        */ 
+        
+        void virtual tipo_usuario() = 0;
+};
+
+class estudante : public usuario{
+    int matricula;
+    string curso;
+    
+    public:
+        estudante(const string& n, int i, int m, const string& c):usuario(n, i){
+            matricula = m;
+            curso = c;
+        };
+        
+        void exibir_detalhes() override {
+            cout << "Nome: " << get_nome() << endl;
+            cout << "Idade: " << get_idade() << endl;
+            cout << "Matricula: " << matricula << endl;
+            cout << "Curso: " << curso << endl;
+        };
+        
+        void operator<<(const estudante& e){
+            exibir_detalhes();
+            
+        };
+        
+        void tipo_usuario() override{
+            cout << "Estudante" << endl;  
+        };
+};
+
+class professor : public usuario{
+    string departamento;
+    
+    public:
+        professor(const string& n, int i, const string& d):usuario(n, i){
+            departamento = d;
+        };
+        
+        string get_departamento() {return departamento;}
+        void set_departamento(const string& d){departamento = d;}
+        
+        void exibir_detalhes() override{
+            cout << "Nome: " << get_nome() << endl;
+            cout << "Idade: " << get_idade() << endl;
+            cout << "Departamento: " << departamento<< endl;
+        };
+        
+        void operator<<(const professor& p){
+            exibir_detalhes();
+        };
+        
+        void tipo_usuario() override{
+            cout << "Professor" << endl;  
+        };
+};
+
+class material{
+    string titulo;
+    
+    public:
+        material(const string& t){
+            titulo = t;
+        };
+    
+    string get_titulo() const {return titulo;}
+    void set_titulo(const string& t){titulo = t;}
+    
+    virtual void exibir_detalhes() = 0;
+    
+    friend ostream& operator<<(ostream& os, const material& m){
+        os << "Titulo: " << m.titulo << endl;
+        return os;
+    };
+};
+
+class livro : public material{
+    string autor;
+    int ano_pub;
+    
+    public:
+        livro(const string& t, const string& a, int an):material(t){
+            autor = a;
+            ano_pub = an;
+        };
+        
+        void exibir_detalhes() override{
+            cout << "Titulo: " << get_titulo() << endl;
+            cout << "Autor: " << autor << endl;
+            cout << "Ano de Publicação: " << ano_pub << endl;
+        };
+        
+        friend ostream& operator<<(ostream& os, const livro& l){
+            os << "Informações do Livro:" << endl;
+            os << "Titulo: " << l.get_titulo() << endl;
+            os << "Autor: " << l.autor << endl;
+            os << "Ano de Publicação: " << l.ano_pub << endl;
+            return os;
+        };
+};
+
+class revista : public material{
+    int num_ed;
+    
+    public:
+        revista(const string& t, int n):material(t){
+            num_ed = n;
+        };
+        
+        void exibir_detalhes() override{
+            cout << "Titulo: " << get_titulo() << endl;
+            cout << "Número de Edição: " << num_ed << endl;
+        };
+        
+        friend ostream& operator<<(ostream& os, const revista& r){
+            os << "Titulo: " << r.get_titulo() << endl;
+            os << "Número de Edição: " << r.num_ed << endl; 
+            return os;
+        };
+};
+
+class emprestimo{
+    usuario* us;
+    material* ma;
+    string data_empres;
+    
+    public:
+        emprestimo(usuario* u, material* m, const string& d) : us(u), ma(m){
+            us = u;
+            ma = m;
+            data_empres = d;
+        };
+        
+        usuario* get_us() const {return us;}
+        void set_us(usuario* u){us = u;}
+        
+        material* get_ma(){return ma;}
+        void set_ma(material* m){ma = m;}
+        
+        string get_data_emp(){return data_empres;}
+        void set_data_emp(const string& d){data_empres = d;}
+        
+        void exibir_detalhes(){
+            cout << "Nome: " << us->get_nome() << endl;
+            cout << "Idade: " << us->get_idade() << endl;
+            cout << "Titulo: " << ma->get_titulo() << endl;
+            cout << "Data do Emprestimo: " << data_empres << endl;
+        };
+        
+        friend ostream& operator<<(ostream& os, emprestimo& es){
+            es.exibir_detalhes();
+            return os;
+        };
+};
+
+class biblioteca{
+    vector<usuario*> usuarios;
+    vector<material*> materiais;
+    vector<emprestimo*> emprestimos;
+    
+    public:
+        biblioteca(){ //inicialização dos vetores
+            usuarios = {};
+            materiais = {};
+            emprestimos = {};
+        };
+        void adicionar_usuario(usuario* us){
+            usuarios.push_back(us);
+        };
+        
+        void adicionar_material(material* ma){
+            materiais.push_back(ma);
+        };
+        
+        void listar_usuarios(){
+            for(auto u:usuarios){
+                u->exibir_detalhes();
+                cout << endl;
+            };
+        };
+        
+        void listar_materiais(){
+            for(auto m:materiais){
+                m->exibir_detalhes();
+                cout << endl; 
+            };
+        };
+        
+        void emprestar_material(usuario* us, material* ma, string d){
+            emprestimo* emp = new emprestimo(us, ma, d);
+            emprestimos.push_back(emp);
+        };
+        
+        void devolver_material(usuario* us, material* ma){
+            for (auto aux = emprestimos.begin(); aux != emprestimos.end(); aux++){
+                if((*aux)->get_us() == us && (*aux)->get_ma() == ma){
+                    emprestimos.erase(aux);  
+                    break;
+                };
+            }; 
+        };
+        
+        void listar_emprestimos(){
+                
+                if(emprestimos.empty()){ //caso esteja vazio:
+                    cout << "Não há registro de Emprestimos no momento" << endl; 
+                }
+                else{ //caso esteja preenchida:
+                    for(auto emp : emprestimos){
+                    cout << *emp << endl;
+                };
+            };
+        };
+        
+        void deslocar_recursos(){
+            for(auto u:usuarios){
+                delete u;  
+            };
+            
+            for(auto m:materiais){
+                delete m;  
+            };
+            
+            for(auto emp:emprestimos){
+                delete emp;  
+            };
+        };
+};
+
+
+int main(){
+    
+    //criação da biblioteca e adição de usuarios e materiais
+    biblioteca* biblio = new biblioteca();
+    
+    material* m1 = new livro("Belas Maldições", "Neil Gaiman", 1990);
+    material* m2 = new livro("Lou", "I.K. Prado", 2023);
+    material* m3 = new revista("Turma da Monica", 10);
+    material* m4 = new revista("Turma da Monica Jovem", 48);
+    
+    usuario* u1 = new estudante("Jorge", 15, 13265, "CDIA");
+    usuario* u2 = new professor("Mauricio", 56, "Estatistica");
+    
+    biblio->adicionar_usuario(u1);
+    biblio->adicionar_usuario(u2);
+    
+    biblio->adicionar_material(m1);
+    biblio->adicionar_material(m2);
+    biblio->adicionar_material(m3);
+    biblio->adicionar_material(m4);
+    
+
+    //emprestimos
+    biblio->emprestar_material(u1, m3, "22/04/2023");
+    biblio->emprestar_material(u2, m1, "05/12/2022");
+    
+    //prints
+    biblio->listar_usuarios();
+    biblio->listar_materiais();
+    biblio->listar_emprestimos();
+    
+    //devoluções
+    biblio->devolver_material(u1, m3);
+    biblio->devolver_material(u2, m1);
+    
+    //novo print + delete para que não tenha vazamento de memória
+    biblio->listar_emprestimos();
+    biblio->deslocar_recursos();
+    
+    return 0;
+};
