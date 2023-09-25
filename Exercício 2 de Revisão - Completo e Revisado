@@ -1,0 +1,210 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+using std::getline;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+
+class funcionario{
+    string nome;
+    int idade;
+    
+    public:
+        //metodo construtor
+        funcionario(const string& n, int i){
+            nome = n;
+            idade = i;
+        };
+        
+        //gets e sets constantes
+        string get_nome() const {return nome;}
+        void set_nome(string n){nome = n;};
+        
+        int get_idade() {return idade;}
+        void set_idade(int i){idade = i;};
+        
+        //metodos
+        virtual void exibir_detalhes(){
+            cout << "Nome: " << nome << endl;
+            cout << "Idade: " << idade << endl;
+        };
+        
+        friend ostream& operator<<(ostream& os, const funcionario& f) {
+            os << "Nome: " << f.nome << endl;
+            os << "Idade: " << f.idade << endl;
+            return os;
+        };
+};
+
+class gerente : public funcionario{
+    string departamento;
+    int nivel_acs;
+    
+    public:
+    
+        //construtor que chama o construtor da base
+        gerente(const string& n, int i, const string& d, int n_a):funcionario(n, i){
+            departamento = d;
+            nivel_acs = n_a;
+        };
+        
+        //gets e sets constantes
+        string get_dep() const {return departamento;}
+        void set_dep(const string& d){departamento = d;}
+        
+        int get_nivel_acs() const {return nivel_acs;}
+        void set_nivel_acs(int n) {nivel_acs = n;}
+        
+        //metodos
+        void exibir_detalhes() override {
+            cout << endl << "Nome: " << get_nome() << endl;
+            cout << "Idade: " << get_idade() << endl;
+            cout << "Departamento: " << departamento << endl;
+            cout << "Nível de Acesso: " << nivel_acs << endl;
+        };
+        
+        void definir_nivel_acesso(){
+            
+            if(nivel_acs == 0){
+                cout << "Insira Nível de Acesso do gerente " << get_nome() << ": ";
+                cin >> nivel_acs;
+                cout << "Nível " << nivel_acs << " liberado para gerente " << get_nome() << endl;
+            }else{
+                cout << "Insira novo Nível de Acesso do gerente " << get_nome() << ": ";
+                cin >> nivel_acs;
+                cout << "Novo Nível > " << nivel_acs << " < configurado para gerente " << get_nome() << endl;
+            }
+            
+        };
+};
+
+class desenvolvedor : protected funcionario{
+    string linguagem;
+    
+    public:
+        //construtor
+        desenvolvedor(const string& n, int i, const string& l):funcionario(n, i){
+            linguagem = l;
+        };
+        
+        //gets e sets
+        string get_linguagem() const {return linguagem;}
+        void set_linguagem(const string& l){linguagem = l;}
+        
+        
+        //metodos
+        void exibir_detalhes() override{
+            cout << endl << "Nome: " << get_nome() << endl;
+            cout << "Idade: " << get_idade() << endl;
+            cout << "Linguagem(s) de Programação: " << linguagem << endl;
+        };
+};
+
+class analista : private funcionario{
+    string projeto_atual;
+    
+    public:
+        //construtor
+        analista(const string& n, int i, const string& p):funcionario(n, i){
+            projeto_atual = p;
+        };
+        
+        //gets e sets
+        string get_proj() const {return projeto_atual;}
+        void set_proj(const string& p){projeto_atual = p;}
+        
+        //metodos
+        void exibir_detalhes() override{
+            cout << endl << "Nome: " << get_nome() << endl;
+            cout << "Idade: " << get_idade() << endl;
+            cout << "Projeto Atual: " << projeto_atual << endl;
+        };
+        
+        void alterar_projeto(){
+            string nove_proj;
+            
+            cout << endl << "Digite o novo projeto: ";
+            getline(cin, nove_proj); //usado para receber a string inteira
+            
+            projeto_atual = nove_proj;
+            
+            cout << "Projeto atualizado com sucesso!" << endl;
+        };
+};
+
+class func_estagio : public desenvolvedor, public analista{ //classe com herança multipla
+    //atributos privados
+    int duracao_est;
+    
+    public:
+        //construtor
+        func_estagio(const string& n, int i, const string& l, const string& p, int d):desenvolvedor(n, i, l), analista(n, i, p){
+            duracao_est =  d;  
+        };
+        
+        //get e set
+        int get_dura_est(){return duracao_est;}
+        void set_dura_est(int d){duracao_est = d;}
+        
+        //metodo
+        void exibir_detalhes() override{
+            cout << endl;
+            analista::exibir_detalhes(); //usado pois não é possivel acessar informações de funcionario
+            cout << "Linguagem(s) de Programação: " << get_linguagem() << endl;
+            cout << "Duração do Estágio: " << duracao_est << endl;
+        };
+};
+
+
+int main()
+{
+    //criação dos tipos
+    funcionario* f1 = new funcionario("Jorge", 45);
+    gerente* g1 = new gerente("Lucas", 42, "Estatistica", 4);
+    desenvolvedor* d1 = new desenvolvedor("Marcia", 23, "Python");
+    analista* a1 = new analista("Lucio", 32, "Casa da Dora");
+    func_estagio* e1 = new func_estagio("Juliana", 21, "Java", "Ecolife", 12);
+    
+    
+    //prints
+    f1->exibir_detalhes();
+    g1->exibir_detalhes();
+    d1->exibir_detalhes();
+    a1->exibir_detalhes();
+    e1->exibir_detalhes();
+    
+    
+    //uso dos metodos adicionais
+        
+        cout << "Teste dos metodos adicionais: " << endl;
+        //mudança de nível de acesso dos gerentes
+            //caso 1 - já tem algum nivel
+            g1->exibir_detalhes();
+            g1->definir_nivel_acesso();
+            g1->exibir_detalhes();
+            
+            //caso 2 - ainda não tem acesso:
+            gerente* g2 = new gerente("Marcela", 25, "Fisica", 0);
+            g2->definir_nivel_acesso();
+            g2->exibir_detalhes();
+        
+        //uso da sobrecarga do operador << em funcionario
+            funcionario* f2 = new funcionario("Angelica", 15);
+            cout << *f2 << endl;
+        
+        //alterar projeto em analista
+            a1->exibir_detalhes();
+            a1->alterar_projeto();
+            a1->exibir_detalhes();
+        
+    //desalocação para não ter vazamento de memória
+    delete e1, g1, d1, a1, f1;
+    
+    return 0;
+};
