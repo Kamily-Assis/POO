@@ -130,11 +130,12 @@ class estudante : public usuario{
             cout << "Matricula: " << matricula << endl;
             cout << "Curso: " << curso << endl;
         };
-        
+
+        /*
         void operator<<(const estudante& e){
             exibir_detalhes();
-            
-        };
+        }; //sobrecarga errada
+         */
         
         void tipo_usuario() override{
             cout << "Estudante" << endl;  
@@ -157,10 +158,12 @@ class professor : public usuario{
             cout << "Idade: " << get_idade() << endl;
             cout << "Departamento: " << departamento<< endl;
         };
-        
+
+         /*
         void operator<<(const professor& p){
             exibir_detalhes();
-        };
+        }; //sobrecarga errada
+         */
         
         void tipo_usuario() override{
             cout << "Professor" << endl;  
