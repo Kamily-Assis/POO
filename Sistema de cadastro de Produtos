@@ -1,0 +1,196 @@
+/******************************************************************************
+
+
+- Tratamento de Exceções
+- Metodos e atributos
+- Padrão de projeto
+- Templates
+- STL
+- namespace
+    
+    ** Sistema de cadastro de Produtos **
+
+
+*******************************************************************************/
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class produto{
+    //atributos privados
+    float valor;
+    string cod_barra, nome_fabricante;
+    
+    //atributos publicos
+    public:
+    produto(float v, const string& c, const string& n_f){
+        valor = v;
+        cod_barra = c;
+        nome_fabricante = n_f;
+    };
+    
+    float get_valor() { return valor; }
+    
+    string get_cod_barra() const { return cod_barra; }
+    
+    string const get_nome_fabricante() { return nome_fabricante; }
+    
+};
+
+class produto_alimenticio : public produto{
+    //atributos privados
+    string fabricacao, validade;
+    
+    //atributos publicos
+    produto_alimenticio(float v, const string& c, const string& n_f, const string& f, const string& val)
+    : produto(v, c, n_f), fabricacao(f), validade(val){};
+    
+};
+
+class produto_eletronico : public produto{
+    //atributos privados
+    int voltagem, potencia;
+    
+    //atributos publicos
+    produto_eletronico(float v, const string& c, const string& n_f, int vol, int pot)
+    : produto(v, c, n_f), voltagem(vol), potencia(pot){};
+};
+
+template <typename T> //parametro do tipo generico
+class estoque {
+    //atributos privados
+    int lim_estoque = 5;
+    vector <T> produtos; 
+    
+    //atributos publicos 
+    public:
+        
+        //metodos
+        void adicionar_produto(produto novo_produto){
+            
+            try{
+                if (produtos.size() < lim_estoque){
+                    produtos.push_back(novo_produto);
+                } else {
+                    throw overflow_error("Estoque já cheio!"); //usamos overflow_error como tipo do erro
+                };
+                
+            } catch (const overflow_error& erro) {
+                cerr << erro.what() << endl; //aqui é usado o cerr ao invés do cout para que o erro seja buffado imedatamente
+                //o .what() é usado para o buff imediato da função erro.what()
+            };
+        };
+        
+        double calcular_valor_total() {
+            
+            for (const auto& p : produtos) {
+                lim_estoque += sizeof(produtos) * p.valor;
+            };
+            return lim_estoque;
+        };
+        
+        int quantidade_de_produtos() const {
+            return produtos.size();
+        };
+        
+        friend ostream& operator<<(ostream& os, estoque& est) {
+            if (est.quantidade_de_produtos() != 0){
+                os << "Limite do Estoque: " << est.lim_estoque << endl << endl;
+                os << "Produtos no Estoque:" << endl;
+                for (auto& p : est.produtos) {
+                    os << "Valor: " << p.get_valor() << ", Código de Barra: " << p.get_cod_barra() << ", Fabricante: " << p.get_nome_fabricante() << endl ;
+                }
+                cout << endl; //apenas estetico
+                return os;
+            }else{
+                cout << "Estoque vazio, no momento" << endl << endl;
+            };
+        };
+        
+        estoque<T> operator+(const T& novo_produto) const {
+            estoque<T> novo_estoque = *this; // Cria uma cópia do estoque atual
+            if (novo_estoque.produtos.size() < novo_estoque.lim_estoque) {
+                novo_estoque.produtos.push_back(novo_produto);
+            } else {
+                cout << "Limite do estoque atingido!" << endl;
+            };
+            return novo_estoque;
+        };
+        
+        estoque<T> operator-(const T& produto_removido) const {
+            estoque<T> novo_estoque = *this; // Cria uma cópia do estoque atual
+            auto it = std::find(novo_estoque.produtos.begin(), novo_estoque.produtos.end(), produto_removido);
+            
+            if (it != novo_estoque.produtos.end()) {
+                novo_estoque.produtos.erase(it);
+            } else {
+                cout << "Produto não encontrado no estoque!" << endl;
+            };
+            return novo_estoque;
+        };
+        
+        template <typename U>
+        friend void trasferir_produtos(estoque<U>& origem, estoque<U>& destino){
+        
+        try{    
+            for (const auto& p : origem.produtos) {
+                if (destino.produtos.size() < destino.lim_estoque) {
+                    destino.produtos.push_back(p);
+                } else {
+                    throw overflow_error("Estoque já cheio!");
+                    // se não tiver espaço no estoque, interrompe a transferência.
+                };
+            }; // vai limpar os produtos da origem depois da transferência.
+            
+        } catch (const overflow_error& erro) {
+            cerr << erro.what() << endl << endl;
+        };
+            origem.produtos.clear();
+    };    
+};
+
+
+
+
+int main()
+{
+    estoque<produto> estoque_alimenticio;
+    estoque<produto> estoque_eletronico;
+    estoque<produto> estoque_generico;
+    
+    produto p1(2200, "123456", "Intel");
+    produto p2(4500, "654321", "Samsung");
+    produto p3(9980, "147852", "XiaoMi");
+    estoque_eletronico.adicionar_produto(p1);
+    estoque_eletronico.adicionar_produto(p2);
+    estoque_eletronico.adicionar_produto(p3);
+    
+    produto p4(25, "963258", "Tio João");
+    produto p5(10, "853641", "Máximo");
+    produto p6(20, "159874", "Forno de Minas");
+    estoque_alimenticio.adicionar_produto(p4);
+    estoque_alimenticio.adicionar_produto(p5);
+    estoque_alimenticio.adicionar_produto(p6);
+    
+    produto p7(620, "654789", "Pichau");
+    produto p8(250, "123789", "RetrôParq");
+    produto p9(159, "987321", "XuXiao");
+    estoque_generico.adicionar_produto(p7);
+    estoque_generico.adicionar_produto(p8);
+    estoque_generico.adicionar_produto(p9);
+    
+    cout << estoque_eletronico;
+    cout << estoque_alimenticio;
+    cout << estoque_generico;
+    
+    trasferir_produtos(estoque_eletronico, estoque_generico);
+    
+    cout << estoque_eletronico;
+    cout << estoque_alimenticio;
+    cout << estoque_generico;
+    
+
+    return 0;
+};
